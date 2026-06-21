@@ -1,70 +1,62 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 import numpy as np
-import math
 
-# 1. إعدادات الصفحة العامة والهوية البصرية للموقع
-st.set_page_config(
-    page_title="ScienceSim - منصة المختبرات الرقمية المربحة",
-    page_icon="⚡",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+# إعداد الصفحة لتكون مريحة وتأخذ العرض الكامل
+st.set_page_config(page_title="ScienceSim - قانون أوم", layout="wide")
 
-# تصميم مخصص باستخدام CSS لإعطاء مظهر احترافي للموقع
-st.markdown("""
-<style>
-    .main-title { font-size: 40px !important; color: #2C3E50; text-align: center; font-weight: bold; margin-bottom: 20px; }
-    .hero-text { font-size: 20px; text-align: center; color: #7F8C8D; margin-bottom: 40px; }
-    .premium-box { background-color: #FFF3CD; border-left: 5px solid #FFC107; padding: 20px; border-radius: 5px; }
-    .footer-text { text-align: center; padding: 20px; color: #BDC3C7; font-size: 14px; }
-</style>
-""", unsafe_allow_html=True)
+# عنوان المحاكاة
+st.title("⚡ مختبر الفيزياء: محاكاة تفاعلية لقانون أوم")
+st.write("قم بتغيير قيم المقاومة وشدة التيار من لوحة التحكم الجانبية لمشاهدة تغير التوتر والمماثلة الهيدروليكية.")
 
-# 2. القائمة الجانبية (Sidebar) - للتنقل بين أقسام الموقع
-st.sidebar.title("🧭 تصفح المنصة")
-page = st.sidebar.radio("انتقل إلى:", ["🏠 الصفحة الرئيسية", "🧪 المختبر الافتراضي (قانون أوم)", "📚 مقالات ودروس (SEO)", "💎 الاشتراك المميز (VIP)"])
+st.markdown("---")
 
-# إضافة مساحة إعلانية تجريبية في القائمة الجانبية لمحاكاة الأرباح
-st.sidebar.markdown("---")
-st.sidebar.caption("📢 مساحة إعلانية (Google AdSense)")
-st.sidebar.image("https://via.placeholder.com/250x250.png?text=Ad+Space+Available", use_container_width=True)
+# إنشاء لوحة التحكم في القائمة الجانبية (Sidebar)
+with st.sidebar:
+    st.header("⚙️ لوحة التحكم")
+    R = st.slider("المقاومة (R) بالأوم Ω:", min_value=1.0, max_value=100.0, value=10.0, step=0.5)
+    I = st.slider("شدة التيار (I) بالأمبير A:", min_value=0.1, max_value=5.0, value=1.5, step=0.1)
 
+# حساب التوتر بناءً على قانون أوم U = R * I
+U = R * I
 
-# ==================== القسم 1: الصفحة الرئيسية ====================
-if page == "🏠 الصفحة الرئيسية":
-    st.markdown('<div class="main-title">⚡ مرحباً بك في منصة ScienceSim التعليمية</div>', unsafe_allow_html=True)
-    st.markdown('<div class="hero-text">المنصة الأولى لتبسيط العلوم والفيزياء عبر مختبرات ومحاكاة تفاعلية ومجانية بالكامل.</div>', unsafe_allow_html=True)
+# تقسيم الصفحة إلى عمودين كبيرين متناسقين
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("📊 النتيجة الحسابية والمبيان")
+    # عرض النتيجة بوضوح
+    st.metric(label="التوتر الكهربائي المحسوب (U):", value=f"{U:.2f} V")
     
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.success("🎯 محاكاة تفاعلية")
-        st.write("مختبرات افتراضية تساعد الطلاب على فهم أصعب تجارب الفيزياء والكيمياء بلمسة زر.")
-    with col2:
-        st.info("📚 دروس ومخلصات")
-        st.write("جذاذات وملخصات دروس جاهزة للتحميل متوافقة مع المناهج التعليمية الحديثة للأساتذة.")
-    with col3:
-        st.warning("💰 استثمار رقمي")
-        st.write("موقع مهيأ بالكامل لدمج إعلانات أدسينس وبوابات الدفع لتحقيق دخل مادي مستدام.")
-
-    st.markdown("---")
-    st.subheader("🔥 المحاكاة الأكثر شعبية هذا الأسبوع")
-    st.info("💡 اضغط على 'المختبر الافتراضي' في القائمة الجانبية لتجربة محاكاة قانون أوم تفاعلياً!")
-
-
-# ==================== القسم 2: المختبر الافتراضي ====================
-elif page == "🧪 المختبر الافتراضي (قانون أوم)":
-    st.title("⚡ مختبر الفيزياء: محاكاة تفاعلية لقانون أوم")
-    st.write("حرك المؤشرات في الجانب الأيمن لمشاهدة تغير التوتر والتيار والمقاومة بشكل حي ومباشر.")
+    # رسم مبيان تفاعلي بسيط بقيم متغيرة
+    fig, ax = plt.subplots(figsize=(5, 3.5))
+    current_range = np.linspace(0, 5, 100)
+    voltage_range = R * current_range
     
-    st.markdown("---")
-    col1, col2 = st.columns([1, 2])
+    ax.plot(current_range, voltage_range, color='blue', label=f'U = {R} * I')
+    ax.scatter(I, U, color='red', s=100, zorder=5, label=f'النقطة الحالية ({I}A, {U:.1f}V)')
     
-    with col1:
-        st.subheader("🎛️ لوحة التحكم")
-        # مؤشرات التحكم التفاعلية
-        R = st.slider("المقاومة (R) بالأوم Ω:", min_value=1, max_value=100, value=20)
-        I = st.slider("شدة التيار (I) بالأمبير A:", min_value=0.1, max_value=5.0, value=1.5, step=0.1)
-        
-        # حساب التوتر الرياضي
-        U = R * I
+    ax.set_xlabel("شدة التيار (I) بالأمبير")
+    ax.set_ylabel("التوتر (U) بالفولت")
+    ax.set_title("منحنى تغيرات التوتر بدلالة التيار")
+    ax.grid(True, linestyle='--')
+    ax.legend()
+    
+    st.pyplot(fig)
+
+with col2:
+    st.subheader("💧 المماثلة الهيدروليكية (Hydraulic Analogy)")
+    st.write("لفهم التجريد الفيزيائي، تخيل الدائرة الكهربائية كمضخة أنابيب مياه:")
+    
+    # رسم توضيحي بسيط للمماثلة الهيدروليكية باستخدام Matplotlib
+    fig2, ax2 = plt.subplots(figsize=(5, 3.5))
+    
+    # رسم تشبيهي للمضخة والتضييق
+    ax2.text(0.5, 0.8, f"💧 ضغط الماء (التوتر U) = {U:.2f} متر", fontsize=11, ha='center', color='blue', weight='bold')
+    ax2.text(0.5, 0.5, f"🚧 تضييق الأنبوب (المقاومة R) = {R} أوم", fontsize=11, ha='center', color='red', weight='bold')
+    ax2.text(0.5, 0.2, f"🌊 تدفق الماء (التيار I) = {I} أمبير", fontsize=11, ha='center', color='green', weight='bold')
+    
+    # إخفاء المحاور لتبدو كبطاقة توضيحية جمالية
+    ax2.axis('off')
+    ax2.set_facecolor('#f0f2f6')
+    st.pyplot(fig2)
