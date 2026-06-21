@@ -1,4 +1,4 @@
-limport streamlit as st
+import streamlit as st
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import numpy as np
@@ -45,11 +45,11 @@ def draw_simulation(U_val, R_val, I_val, highlight_type):
     
     # Textes descriptifs phénoménologiques
     if highlight_type == "push":
-        ax.text(1.5, 3.2, f"⬅️ Force de Poussée : {U_val:.1f}", color='red', weight='bold', ha='center')
+        ax.text(1.5, 3.2, f"Force de Poussee : {U_val:.1f}", color='red', weight='bold', ha='center')
     elif highlight_type == "block":
-        ax.text(4, 2.9 + pipe_thickness/2, f"🚧 Étranglement (Obstacle)", color='brown', weight='bold', ha='center')
+        ax.text(4, 2.9 + pipe_thickness/2, f"Etranglement (Obstacle)", color='brown', weight='bold', ha='center')
     
-    ax.text(6.5, 3.2, f"🌊 Débit de l'eau : {I_val:.2f}", color='blue', weight='bold', ha='center')
+    ax.text(6.5, 3.2, f"Debit de l'eau : {I_val:.2f}", color='blue', weight='bold', ha='center')
     
     ax.set_xlim(0, 8)
     ax.set_ylim(0, 4)
@@ -58,27 +58,30 @@ def draw_simulation(U_val, R_val, I_val, highlight_type):
 
 # ----------------- NIVEAUX DU JEU -----------------
 
-# NIVEAU 1 : Découverte du Courant et de la Tension
+# NIVEAU 1
 if st.session_state.level == 1:
-    st.subheader("🕹️ Niveau 1 : Le mystère de l'eau immobile")
-    st.info("💡 **Constat Phénoménologique :** L'eau ne bouge pas dans le tuyau car il n'y a aucune force pour la pousser. La lampe est éteinte !")
-    st.warning("🎯 **Votre Mission :** Augmentez la 'Force de Poussée' pour que le débit de l'eau dépasse **2.5** afin d'allumer la lampe.")
+    st.subheader("🕹️ Niveau 1 : Le mystere de l'eau immobile")
+    st.info("💡 **Constat Phenomenologique :** L'eau ne bouge pas dans le tuyau car il n'y a aucune force pour la pousser. La lampe est eteinte !")
+    st.warning("🎯 **Votre Mission :** Augmentez la 'Force de Poussere' pour que le debit de l'eau depasse 2.5 afin d'allumer la lampe.")
     
-    push_force = st.slider("🔴 Ajuster la Force de Poussée (Tension électrique U) :", min_value=0.0, max_value=20.0, value=2.0, step=0.5)
-    fixed_resistance = 4.0  # Obstacle constant pour le niveau 1
+    push_force = st.slider("🔴 Ajuster la Force de Poussee (Tension electrique U) :", min_value=0.0, max_value=20.0, value=2.0, step=0.5)
+    fixed_resistance = 4.0
     resulting_current = push_force / fixed_resistance
     
     st.pyplot(draw_simulation(push_force, fixed_resistance, resulting_current, "push"))
     
     if resulting_current >= 2.5:
-        st.success("🎉 Bravo ! La force est suffisante, l'eau s'écoule et la lampe s'allume !")
+        st.success("🎉 Bravo ! La force est suffisante, l'eau s'ecoule et la lampe s'allume !")
         if st.button("Passer au Niveau 2 ➡️"):
             st.session_state.score += 50
             st.session_state.level = 2
             st.rerun()
 
-# NIVEAU 2 : Découverte de la Résistance
+# NIVEAU 2
 elif st.session_state.level == 2:
-    st.subheader("🕹️ Niveau 2 : Alerte à l'inondation (Le besoin de freiner)")
-    st.info("💡 **Constat Phénoménologique :** La pompe est bloquée à puissance maximale ! Le débit est trop dangereux, les fils chauffent et la lampe risque de griller !")
-    st.warning("🎯 **Votre Mission :** Créez un 'Étranglementength, 0, head_width=0.2, head_length=0.2, fc='red', ec='red', lw=4, label='...'
+    st.subheader("🕹️ Niveau 2 : Alerte a l'inondation")
+    st.info("💡 **Constat Phenomenologique :** La pompe est bloquee a puissance maximale ! Le debit est trop dangereux !")
+    st.warning("🎯 **Votre Mission :** Creez un 'Etranglement' (Obstacle) pour freiner l'eau et stabiliser le debit entre 1.0 et 1.8.")
+    
+    fixed_push = 18.0
+    block_force = st.slider("🟤 Serrer l'etranglement du tuyau (Resistance R) :", min_value=1.0, max_value=20.0, value=2.0
