@@ -75,4 +75,4 @@ with col2:
     # 3. رسم سهم ضغط الماء (يمثل التوتر U)
     # طول السهم يتناسب مع قيمة التوتر U
     arrow_length = min(3, U / 20)
-    ax.arrow(0.5, 2, arrow_length, 0, head_width=0.2, head_length=0.2, fc='red', ec='red', lw=4, la
+    ax.arrow(0.5, 2, arrow_length, 0, head_width=0.2, head_length=0.2, fc='red', ec='red', lw=4, label='...')
