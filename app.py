@@ -84,4 +84,4 @@ elif st.session_state.level == 2:
     st.warning("🎯 **Votre Mission :** Creez un 'Etranglement' (Obstacle) pour freiner l'eau et stabiliser le debit entre 1.0 et 1.8.")
     
     fixed_push = 18.0
-    block_force = st.slider("🟤 Serrer l'etranglement du tuyau (Resistance R) :", min_value=1.0, max_value=20.0, value=2.0
+    block_force = st.slider("🟤 Serrer l'etranglement du tuyau (Resistance R) :", min_value=1.0, max_value=20.0, value=2.0)
