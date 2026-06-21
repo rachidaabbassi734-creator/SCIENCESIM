@@ -1,87 +1,120 @@
+# -*- coding: utf-8 -*-
 import streamlit as st
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
 import numpy as np
 
-# Configuration de la page en mode large
-st.set_page_config(page_title="ScienceSim - Mission Loi d'Ohm", layout="wide")
+# Configuration de la page TICE
+st.set_page_config(page_title="ScienceSim - Jeu Interactif", layout="centered")
 
-# Gestion de la progression du jeu (State Management)
-if 'level' not in st.session_state:
-    st.session_state.level = 1
-if 'score' not in st.session_state:
+# Initialisation des variables de session (Score et Progression)
+if "score" not in st.session_state:
     st.session_state.score = 0
+if "defi_etape" not in st.session_state:
+    st.session_state.defi_etape = 1
+if "jeu_termine" not in st.session_state:
+    st.session_state.jeu_termine = False
 
-st.title("🎮 Mission Phénoménologique : Sauvez le Système Hydraulique & Électrique")
-st.write(f"🏆 **Score actuel :** {st.session_state.score} points | 🕹️ **Niveau :** {st.session_state.level} / 3")
+# En-tête de l'application
+st.title("🔬 ScienceSim : Le Défi de l'Équilibre")
+st.write("Bienvenue Professeur ! Voici la version de simulation scénarisée sous forme de jeu.")
 
-st.markdown("---")
+# Fonction pour réinitialiser le jeu
+def recommencer():
+    st.session_state.score = 0
+    st.session_state.defi_etape = 1
+    st.session_state.jeu_termine = False
 
-# ----------------- FONCTION VISUELLE DE SIMULATION -----------------
-def draw_simulation(U_val, R_val, I_val, highlight_type):
-    fig, ax = plt.subplots(figsize=(7, 3))
-    pipe_thickness = max(0.3, 2.0 - (R_val / 10.0))
-    
-    # Dessin du tuyau hydraulique
-    ax.add_patch(patches.Rectangle((0, 1), 3, 2, color='lightblue', alpha=0.4))
-    ax.add_patch(patches.Rectangle((3, 2 - pipe_thickness/2), 2, pipe_thickness, color='skyblue', alpha=0.8))
-    ax.add_patch(patches.Rectangle((5, 1), 3, 2, color='lightblue', alpha=0.4))
-    
-    ax.plot([0, 3, 5, 8], [1, 2 - pipe_thickness/2, 2 - pipe_thickness/2, 1], color='black', lw=3)
-    ax.plot([0, 3, 5, 8], [3, 2 + pipe_thickness/2, 2 + pipe_thickness/2, 3], color='black', lw=3)
-    
-    # Molécules d'eau (Courant résultant)
-    num_particles = int(I_val * 12)
-    np.random.seed(42)
-    x_p = np.random.uniform(0.5, 7.5, num_particles)
-    y_p = np.random.uniform(1.2, 2.8, num_particles)
-    y_p = np.where((x_p >= 3) & (x_p <= 5), np.random.uniform(2 - pipe_thickness/2 + 0.1, 2 + pipe_thickness/2 - 0.1, num_particles), y_p)
-    
-    ax.scatter(x_p, y_p, color='blue', s=40, alpha=0.6)
-    
-    # Flèche représentant la force de poussée
-    arrow_len = min(2.5, U_val / 8)
-    ax.arrow(0.3, 2, arrow_len, 0, head_width=0.15, head_length=0.15, fc='red', ec='red', lw=4)
-    
-    # Textes descriptifs phénoménologiques
-    if highlight_type == "push":
-        ax.text(1.5, 3.2, f"Force de Poussee : {U_val:.1f}", color='red', weight='bold', ha='center')
-    elif highlight_type == "block":
-        ax.text(4, 2.9 + pipe_thickness/2, f"Etranglement (Obstacle)", color='brown', weight='bold', ha='center')
-    
-    ax.text(6.5, 3.2, f"Debit de l'eau : {I_val:.2f}", color='blue', weight='bold', ha='center')
-    
-    ax.set_xlim(0, 8)
-    ax.set_ylim(0, 4)
-    ax.axis('off')
-    return fig
+# Barre latérale : Tableau de bord de l'élève
+with st.sidebar:
+    st.header("🏆 Tableau de Bord")
+    st.metric(label="Score Actuel", value=f"{st.session_state.score} pts")
+    st.metric(label="Mission en cours", value=f"Étape {st.session_state.defi_etape} / 3")
+    if st.button("Réinitialiser la partie"):
+        recommencer()
 
-# ----------------- NIVEAUX DU JEU -----------------
+# LOGIQUE DU JEU & DES MISSIONS
+if not st.session_state.jeu_termine:
+    
+    if st.session_state.defi_etape == 1:
+        st.subheader("🎯 Mission 1 : La Règle de l'Intensité Égale")
+        st.info("Consigne : Un solide est tiré vers la gauche par un dynamomètre D1 avec une force F1 = 4 N. Ajustez la force F2 du dynamomètre D2 (vers la droite) pour maintenir le système en parfait équilibre !")
+        
+        # Commande interactive (Curseur)
+        f1 = 4.0
+        f2 = st.slider("Ajustez l'intensité de la Force F2 (en Newtons) :", min_value=0.0, max_value=8.0, value=1.0, step=0.5)
+        
+        # Génération de la simulation graphique
+        fig, ax = plt.subplots(figsize=(6, 2))
+        ax.axhline(0, color='#7f8c8d', linestyle='--')
+        # Dessin du solide au centre
+        ax.plot(0, 0, 's', color='#e67e22', markersize=20, label="Solide")
+        # Vecteurs forces
+        ax.quiver(0, 0, -f1, 0, angles='xy', scale_units='xy', scale=1, color='#e74c3c', label="F1 (Gauche)")
+        ax.quiver(0, 0, f2, 0, angles='xy', scale_units='xy', scale=1, color='#2cecc71' if f1==f2 else '#3498db', label="F2 (Droite)")
+        
+        ax.set_xlim(-6, 6)
+        ax.set_ylim(-1, 1)
+        ax.axis('off')
+        st.pyplot(fig)
+        
+        # Validation du défi
+        if st.button("Valider l'équilibre"):
+            if f2 == f1:
+                st.success("🎉 Excellent ! Les deux forces ont la même intensité, le solide reste immobile.")
+                st.session_state.score += 10
+                st.session_state.defi_etape = 2
+                st.rerun()
+            else:
+                st.error("❌ Échec de l'équilibre ! Le solide se déplace du côté de la force la plus intense. Réessayez !")
 
-# NIVEAU 1
-if st.session_state.level == 1:
-    st.subheader("🕹️ Niveau 1 : Le mystere de l'eau immobile")
-    st.info("💡 **Constat Phenomenologique :** L'eau ne bouge pas dans le tuyau car il n'y a aucune force pour la pousser. La lampe est eteinte !")
-    st.warning("🎯 **Votre Mission :** Augmentez la 'Force de Poussere' pour que le debit de l'eau depasse 2.5 afin d'allumer la lampe.")
-    
-    push_force = st.slider("🔴 Ajuster la Force de Poussee (Tension electrique U) :", min_value=0.0, max_value=20.0, value=2.0, step=0.5)
-    fixed_resistance = 4.0
-    resulting_current = push_force / fixed_resistance
-    
-    st.pyplot(draw_simulation(push_force, fixed_resistance, resulting_current, "push"))
-    
-    if resulting_current >= 2.5:
-        st.success("🎉 Bravo ! La force est suffisante, l'eau s'ecoule et la lampe s'allume !")
-        if st.button("Passer au Niveau 2 ➡️"):
-            st.session_state.score += 50
-            st.session_state.level = 2
-            st.rerun()
+    elif st.session_state.defi_etape == 2:
+        st.subheader("🎯 Mission 2 : Le Piège de la Droite d'Action")
+        st.info("Consigne : Pour que le solide soit en équilibre, la géométrie des forces est cruciale. Choisissez la bonne configuration pour la droite d'action :")
+        
+        choix_geometrie = rel_choix = st.radio(
+            "Quelle condition géométrique doivent remplir les lignes d'action des deux forces ?",
+            ["Elles doivent être parallèles mais décalées", "Elles doivent être perpendiculaires", "Elles doivent être confondues (Même droite d'action)", "Elles n'ont pas d'importance"]
+        )
+        
+        if st.button("Soumettre la réponse"):
+            if choix_geometrie == "Elles doivent être confondues (Même droite d'action)":
+                st.success("🎉 Bravo ! C'est la condition de colinéarité essentielle pour éviter la rotation du solide.")
+                st.session_state.score += 15
+                st.session_state.defi_etape = 3
+                st.rerun()
+            else:
+                st.error("❌ Mauvaise analyse. Si les droites d'action ne sont pas confondues, le solide va tourner ou pivoter.")
 
-# NIVEAU 2
-elif st.session_state.level == 2:
-    st.subheader("🕹️ Niveau 2 : Alerte a l'inondation")
-    st.info("💡 **Constat Phenomenologique :** La pompe est bloquee a puissance maximale ! Le debit est trop dangereux !")
-    st.warning("🎯 **Votre Mission :** Creez un 'Etranglement' (Obstacle) pour freiner l'eau et stabiliser le debit entre 1.0 et 1.8.")
+    elif st.session_state.defi_etape == 3:
+        st.subheader("🎯 Mission 3 : L'Équation Vectorielle Finale")
+        st.info("Consigne : Complétez la relation mathématique vectorielle qui caractérise l'état d'un corps en équilibre sous deux forces :")
+        
+        formule = st.selectbox("Sélectionnez la relation correcte :", ["F1 + F2 = 1", "F1 + F2 = 0 (Vecteur nul)", "F1 - F2 = 2", "F1 * F2 = 0"])
+        
+        if st.button("Finaliser le Défi"):
+            if formule == "F1 + F2 = 0 (Vecteur nul)":
+                st.success("🎉 Parfait ! C'est la loi de compensation des actions mécaniques.")
+                st.session_state.score += 20
+                st.session_state.jeu_termine = True
+                st.rerun()
+            else:
+                st.error("❌ Faux. La somme vectorielle doit s'annuler pour maintenir l'immobilité complète.")
+
+else:
+    # Écran de fin de jeu (Idéal pour placer un appel à l'action Premium)
+    st.balloons()
+    st.subheader("🏁 Félicitations ! Vous avez terminé le module interactif.")
+    st.write(f"Votre score final est de : **{st.session_state.score} points**.")
     
-    fixed_push = 18.0
-    block_force = st.slider("🟤 Serrer l'etranglement du tuyau (Resistance R) :", min_value=1.0, max_value=20.0, value=2.0)
+    # Stratégie de madkhoul / Monétisation visible à la fin
+    st.markdown("""
+    ---
+    ### 🔓 Débloquez la suite de ScienceSim !
+    Vous voulez accéder aux **15 autres simulations du programme officiel de Physique-Chimie (3ASC)** ainsi qu'aux fiches techniques téléchargeables au format PDF ?
+    
+    👉 **Passez à la version Premium !** Contactez l'administrateur pour obtenir votre code d'activation.
+    """)
+    
+    if st.button("Rejouer"):
+        recommencer()
+        st.rerun()
